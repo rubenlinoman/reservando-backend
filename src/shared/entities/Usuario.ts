@@ -18,14 +18,20 @@ export class Usuario {
   @PrimaryGeneratedColumn({ type: "int", name: "id_usuario" })
   idUsuario: number;
 
-  @Column("varchar", { name: "nombre_usuario", length: 255 })
-  nombreUsuario: string;
+  @Column('varchar', { name: 'usuario', length: 255 })
+  usuario: string;
 
-  @Column("varchar", { name: "correo_electronico", length: 255 })
-  correoElectronico: string;
+  @Column('varchar', { name: 'nombre', length: 255, nullable: true })
+  nombre: string | null;
 
-  @Column("varchar", { name: "contrasena", length: 255 })
-  contrasena: string;
+  @Column('varchar', { name: 'apellidos', length: 255, nullable: true })
+  apellidos: string | null;
+
+  @Column('varchar', { name: 'email', length: 255 })
+  email: string;
+
+  @Column('varchar', { name: 'password', length: 255 })
+  password?: string;
 
   @Column("int", { name: "id_tipo_usuario" })
   idTipoUsuario: number;
