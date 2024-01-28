@@ -22,8 +22,8 @@ export class AuthService {
    */
   async findUserByMail(email: string): Promise<Usuario> {
     const user = await this.usuarioRepository.findOneBy({ email: email });
-    const { password, ...result } = user;
-    return result;
+    const { password, ...rest } = user;
+    return rest;
   }
 
   /**
@@ -48,13 +48,15 @@ export class AuthService {
       throw new UnauthorizedException('Credentials invalid - password');
     }
 
+    const { password:_, ...rest } = user;
+
     const token = this.getJwtToken({
       email: user.email,
       usuario: user.usuario,
     });
 
     return {
-      usuario: user,
+      user: rest,
       token: token,
     };
   }
