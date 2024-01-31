@@ -19,6 +19,6 @@ export class RegisterDto {
   password: string;
 
   @IsInt()
-  @IsIn([1, 2, 3, 4], { message: 'Invalid type of user' })
+  @IsIn([1, 2, 3, 4], { message: 'Tipo de usuario inválido' })
   idTipoUsuario: number;
 }

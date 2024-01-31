@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import * as entity from './shared/entities';  // Importa todas las entidades desde el índice
+import * as entity from './shared/entities' ;  // Importa todas las entidades desde el índice
 
 // M
 import { AuthModule } from './auth/auth.module';
@@ -24,9 +24,10 @@ import { UsuarioModule } from './usuario/usuario.module';
       // Entidades de la base de datos
       entities: [
         entity.Alojamiento,
-        entity.Empresa,
         entity.EstadoAlojamiento,
+        entity.Habitacion,
         entity.Reserva,
+        entity.TipoAlojamiento,
         entity.TipoUsuario,
         entity.Usuario
       ],

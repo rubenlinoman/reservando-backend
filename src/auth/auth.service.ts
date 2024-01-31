@@ -14,6 +14,7 @@ import { RegisterDto } from './dto/register.dto';
 
 import * as bcryptjs from 'bcryptjs';
 
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -46,13 +47,9 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('Credentials invalid - email');
-    }
+    }  
 
-    // if ( !bcryptjs.compareSync( password, user.pass )) {
-    //   throw new UnauthorizedException('Credentials invalid - password');
-    // }
-
-    if (user.password !== password) {
+    if ( !bcryptjs.compareSync( password, user.password )) {
       throw new UnauthorizedException('Credentials invalid - password');
     }
 
@@ -70,12 +67,14 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<LoginResponse> {
-    console.log('Iniciando el proceso de registro con:', registerDto);
+
+    console.log('registerDto', registerDto);
+    
+
     const user = await this.crear(registerDto);
-    const token = this.getJwtToken({
-      email: user.email,
-      usuario: user.usuario,
-    });
+    console.log('user', user);
+    
+    const token = this.getJwtToken({ email: user.email, usuario: user.usuario, });
 
     console.log('Registro exitoso:', user);
 
@@ -86,38 +85,35 @@ export class AuthService {
   }
 
   async crear(registerDto: RegisterDto) {
-    console.log('Creando un nuevo usuario con:', registerDto);
+    console.log('registerDto', registerDto);
+    
     try {
       const { password, ...userData } = registerDto;
+      console.log('userData', userData);
+      
       const passEncriptada = bcryptjs.hashSync(password, 10);
 
-      console.log('Contraseña encriptada:', passEncriptada);
-
+      console.log('passEncriptada', passEncriptada);
       // 1- Crea el usuario
       const newUser = this.usuarioRepository.create({
         password: passEncriptada,
         ...userData,
       });
 
-      console.log('Nuevo usuario creado:', newUser);
+      console.log('newUser', newUser);
+      
       // 2- Guardar el usuario
       await this.usuarioRepository.insert(newUser);
 
       // 3- Elimina el Pass para devolverlo en el array
       const { password:_, ...user } = newUser;
 
-      console.log('Usuario creado sin contraseña:', user);
+      console.log('user', user);
+      
       return user;
 
-      // } catch(error) {
-
-      //   if (error.errno === 1062) {
-      //     throw new BadRequestException(`${ registerDto.email } alredy exists!`);
-      //   }
-      //   throw new BadRequestException(`Something terrible happend :( !`)
-      // }
     } catch (error) {
-      console.error('Error durante el registro:', error);
+
       if (error.errno === 1062) {
         throw new BadRequestException(`${registerDto.email} ya existe!`);
       }
