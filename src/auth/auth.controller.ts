@@ -4,6 +4,7 @@ import { LoginDto } from './dto/login.dto';
 import { LoginResponse } from './interfaces/login-response';
 import { Usuario } from 'src/shared/entities';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,11 @@ export class AuthController {
     @Post('/login')
     login(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
+    }
+
+    @Post('/register')
+    registro(@Body() registerDto: RegisterDto) {
+      return this.authService.register(registerDto);
     }
 
     @UseGuards( AuthGuard )
