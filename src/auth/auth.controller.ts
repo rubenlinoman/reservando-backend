@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, Request, Patch, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponse } from './interfaces/login-response';
@@ -6,6 +6,7 @@ import { Usuario } from 'src/shared/entities';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto';
+import { PasswordChangeDto } from './dto/passwordChange.dt';
 
 @Controller('auth')
 export class AuthController {
@@ -38,6 +39,11 @@ export class AuthController {
     passwordRecovery(@Body() forgotPasswordDto: ForgotPasswordDto) {
       return this.authService.forgotPassword(forgotPasswordDto);
     }
-    
 
+    @Patch('password-change')
+    passwordChange( 
+      @Body() passwordChangeDto: PasswordChangeDto
+    ) {
+      return this.authService.passUpdate(passwordChangeDto);
+    }
 }

@@ -2,6 +2,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,8 +16,10 @@ import { Usuario } from 'src/shared/entities';
 import { ForgotPasswordMail } from './interfaces';
 
 import * as bcryptjs from 'bcryptjs';
+import * as jwt from 'jsonwebtoken';
 
 import { MailService } from '../mail/services/mail.service';
+import { PasswordChangeDto } from './dto/passwordChange.dt';
 
 
 @Injectable()
@@ -156,6 +159,34 @@ export class AuthService {
     }
 
     return this.mailService.sendForgotPasswordMail(ForgotPasswordMail);
+  }
+
+  /**
+   * Método para cambiar la contraseña
+   * @param passwordChangeDto - token, email y password
+   */
+  async passUpdate(passwordChangeDto: PasswordChangeDto) {
+    const { token, email, newPassword } = passwordChangeDto;
+  
+    try {
+      // Verificar si el token es válido y no ha expirado
+      jwt.verify(token, 'secreto');
+  
+      // Obtener el usuario correspondiente al email
+      const user = await this.usuarioRepository.findOneBy({ email: email });
+      // Encriptar la nueva contraseña
+      const passEncriptada = bcryptjs.hashSync(newPassword, 10);
+  
+      if (user) {
+        user.password = passEncriptada;
+        await this.usuarioRepository.save(user);
+      } else {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+    } catch (error) {
+      // Manejar el caso en el que el token no es válido o ha expirado
+      throw new UnauthorizedException('Token no válido o ha expirado');
+    }
   }
 
   /**

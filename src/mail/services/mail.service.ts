@@ -4,7 +4,8 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ForgotPasswordMail } from 'src/auth/interfaces';
 import { Usuario } from 'src/shared/entities/Usuario';
-import { join } from 'path';
+
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class MailService {
@@ -42,7 +43,14 @@ export class MailService {
    * @returns devuelve la respuesta
    */
   async sendForgotPasswordMail(forgotPassword: ForgotPasswordMail) {
-    const url = `${forgotPassword.baseUrl}`;
+    const url = `${forgotPassword.baseUrl}/auth/password-change`;
+
+    console.log('url:', url);
+    
+    // Generar token único
+    const token = jwt.sign({ email: forgotPassword.email }, 'secreto', {
+      expiresIn: '1h',
+    });
 
     // Usar el nombre del archivo de la plantilla
     const template = 'forgot-password';
@@ -58,16 +66,16 @@ export class MailService {
         template: template, // Usar el nombre del archivo de la plantilla
         context: {
           name: forgotPassword.nombre + ' ' + forgotPassword.apellidos,
-          url: url,
+          url: `${url}?token=${token}`, // Incluir el token en la URL
           Mail: forgotPassword.email,
         },
       });
-      console.log('respuesta', respuesta);
-
       return respuesta;
     } catch (error) {
       console.error('Error al enviar el correo electrónico:', error);
-      throw new InternalServerErrorException('Error al enviar el correo electrónico');
+      throw new InternalServerErrorException(
+        'Error al enviar el correo electrónico',
+      );
     }
   }
 }
