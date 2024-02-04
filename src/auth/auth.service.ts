@@ -1,18 +1,22 @@
+
 import {
   BadRequestException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Usuario } from 'src/shared/entities';
-import { Repository } from 'typeorm';
-import { LoginDto } from './dto/login.dto';
-import { LoginResponse } from './interfaces/login-response';
 import { JwtPayload } from './interfaces/jwt-payload';
-import { RegisterDto } from './dto/register.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ForgotPasswordDto, LoginDto } from './dto';
+import { LoginResponse } from './interfaces/login-response';
+import { RegisterDto } from './dto';
+import { Repository } from 'typeorm';
+import { Usuario } from 'src/shared/entities';
+import { ForgotPasswordMail } from './interfaces';
 
 import * as bcryptjs from 'bcryptjs';
+
+import { MailService } from '../mail/services/mail.service';
 
 
 @Injectable()
@@ -21,6 +25,7 @@ export class AuthService {
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly jwtService: JwtService,
+    private mailService: MailService
   ) {}
 
   /**
@@ -119,6 +124,38 @@ export class AuthService {
       }
       throw new BadRequestException('Algo terrible ocurrió :( !');
     }
+  }
+
+  /**
+   * Método para enviar el mail de cambio de password
+   * @param forgotPasswordDto - email y base url
+   * @returns devuelve el mail
+   */
+  async forgotPassword( forgotPasswordDto: ForgotPasswordDto) {
+
+    const { email, baseUrl } = forgotPasswordDto;
+
+    // 1 - comprobar que el mail existe en la base de datos sino devolver error
+    const user = await this.usuarioRepository.findOneBy({ email: email });
+    console.log('user', user);
+    
+
+    if ( !user ) {
+      throw new UnauthorizedException('El mail de usuario no existe');
+    }
+
+    // 2- Si existe, obtenemos el codigo de verificacion para devolverlo en el mail
+    const { nombre, apellidos } = user;
+    const name = nombre;
+    const lastName = apellidos;
+    const ForgotPasswordMail: ForgotPasswordMail = {
+      email: email,
+      nombre: name,
+      apellidos: lastName,
+      baseUrl: baseUrl
+    }
+
+    return this.mailService.sendForgotPasswordMail(ForgotPasswordMail);
   }
 
   /**

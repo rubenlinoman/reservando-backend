@@ -5,9 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import * as entity from './shared/entities' ;  // Importa todas las entidades desde el índice
 
-// M
 import { AuthModule } from './auth/auth.module';
 import { UsuarioModule } from './usuario/usuario.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -36,6 +36,7 @@ import { UsuarioModule } from './usuario/usuario.module';
 
     // Módulos de la aplicación
     AuthModule,
+    MailModule,
     UsuarioModule,
   ],
   controllers: [],

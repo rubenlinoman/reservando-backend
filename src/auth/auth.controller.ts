@@ -5,6 +5,7 @@ import { LoginResponse } from './interfaces/login-response';
 import { Usuario } from 'src/shared/entities';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -32,4 +33,11 @@ export class AuthController {
         token: this.authService.getJwtToken({ email: user.email, usuario: user.usuario }),
       }
     }
+
+    @Post('password-recovery')
+    passwordRecovery(@Body() forgotPasswordDto: ForgotPasswordDto) {
+      return this.authService.forgotPassword(forgotPasswordDto);
+    }
+    
+
 }
