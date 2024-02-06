@@ -74,6 +74,11 @@ export class AuthService {
     };
   }
 
+  /**
+   * Método para registrar un usuario
+   * @param registerDto - email, nombre, apellidos, password
+   * @returns devuelve el token
+   */
   async register(registerDto: RegisterDto): Promise<LoginResponse> {
 
     console.log('registerDto', registerDto);
@@ -92,6 +97,11 @@ export class AuthService {
     };
   }
 
+  /**
+   * Método para crear un usuario
+   * @param registerDto - email, nombre, apellidos, password
+   * @returns devuelve el usuario
+   */
   async crear(registerDto: RegisterDto) {
     console.log('registerDto', registerDto);
     
@@ -174,6 +184,7 @@ export class AuthService {
   
       // Obtener el usuario correspondiente al email
       const user = await this.usuarioRepository.findOneBy({ email: email });
+      
       // Encriptar la nueva contraseña
       const passEncriptada = bcryptjs.hashSync(newPassword, 10);
   

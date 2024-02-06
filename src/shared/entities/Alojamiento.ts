@@ -9,12 +9,10 @@ import {
 } from "typeorm";
 import { TipoAlojamiento } from "./TipoAlojamiento";
 import { Usuario } from "./Usuario";
-import { EstadoAlojamiento } from "./EstadoAlojamiento";
 import { Habitacion } from "./Habitacion";
 
 @Index("id_tipo_alojamiento", ["idTipoAlojamiento"], {})
 @Index("id_propietario", ["idPropietario"], {})
-@Index("id_estado_alojamiento", ["idEstadoAlojamiento"], {})
 @Entity("alojamiento", { schema: "ReservAndo" })
 export class Alojamiento {
   @PrimaryGeneratedColumn({ type: "int", name: "id_alojamiento" })
@@ -29,14 +27,17 @@ export class Alojamiento {
   @Column("int", { name: "capacidad" })
   capacidad: number;
 
+  @Column("varchar", { name: "ciudad", nullable: true, length: 255 })
+  ciudad: string | null;
+
+  @Column("varchar", { name: "imagen", nullable: true, length: 255 })
+  imagen: string | null;
+
   @Column("int", { name: "id_tipo_alojamiento", nullable: true })
   idTipoAlojamiento: number | null;
 
   @Column("int", { name: "id_propietario" })
   idPropietario: number;
-
-  @Column("int", { name: "id_estado_alojamiento" })
-  idEstadoAlojamiento: number;
 
   @ManyToOne(
     () => TipoAlojamiento,
@@ -54,19 +55,6 @@ export class Alojamiento {
   })
   @JoinColumn([{ name: "id_propietario", referencedColumnName: "idUsuario" }])
   idPropietario2: Usuario;
-
-  @ManyToOne(
-    () => EstadoAlojamiento,
-    (estadoAlojamiento) => estadoAlojamiento.alojamientos,
-    { onDelete: "RESTRICT", onUpdate: "RESTRICT" }
-  )
-  @JoinColumn([
-    {
-      name: "id_estado_alojamiento",
-      referencedColumnName: "idEstadoAlojamiento",
-    },
-  ])
-  idEstadoAlojamiento2: EstadoAlojamiento;
 
   @OneToMany(() => Habitacion, (habitacion) => habitacion.idAlojamiento2)
   habitacions: Habitacion[];

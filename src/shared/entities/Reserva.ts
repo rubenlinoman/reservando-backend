@@ -8,11 +8,11 @@ import {
 } from "typeorm";
 import { Usuario } from "./Usuario";
 import { Habitacion } from "./Habitacion";
-import { EstadoAlojamiento } from "./EstadoAlojamiento";
+import { EstadoReserva } from "./EstadoReserva";
 
 @Index("id_usuario", ["idUsuario"], {})
 @Index("id_habitacion", ["idHabitacion"], {})
-@Index("id_estado_alojamiento", ["idEstadoAlojamiento"], {})
+@Index("id_estado_reserva", ["idEstadoReserva"], {})
 @Entity("reserva", { schema: "ReservAndo" })
 export class Reserva {
   @PrimaryGeneratedColumn({ type: "int", name: "id_reserva" })
@@ -30,8 +30,8 @@ export class Reserva {
   @Column("date", { name: "fecha_fin" })
   fechaFin: string;
 
-  @Column("int", { name: "id_estado_alojamiento" })
-  idEstadoAlojamiento: number;
+  @Column("int", { name: "id_estado_reserva" })
+  idEstadoReserva: number;
 
   @ManyToOne(() => Usuario, (usuario) => usuario.reservas, {
     onDelete: "RESTRICT",
@@ -47,16 +47,12 @@ export class Reserva {
   @JoinColumn([{ name: "id_habitacion", referencedColumnName: "idHabitacion" }])
   idHabitacion2: Habitacion;
 
-  @ManyToOne(
-    () => EstadoAlojamiento,
-    (estadoAlojamiento) => estadoAlojamiento.reservas,
-    { onDelete: "RESTRICT", onUpdate: "RESTRICT" }
-  )
+  @ManyToOne(() => EstadoReserva, (estadoReserva) => estadoReserva.reservas, {
+    onDelete: "RESTRICT",
+    onUpdate: "RESTRICT",
+  })
   @JoinColumn([
-    {
-      name: "id_estado_alojamiento",
-      referencedColumnName: "idEstadoAlojamiento",
-    },
+    { name: "id_estado_reserva", referencedColumnName: "idEstadoReserva" },
   ])
-  idEstadoAlojamiento2: EstadoAlojamiento;
+  idEstadoReserva2: EstadoReserva;
 }

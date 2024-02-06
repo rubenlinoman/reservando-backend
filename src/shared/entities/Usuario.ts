@@ -32,6 +32,9 @@ export class Usuario {
   @Column("varchar", { name: "password", length: 255 })
   password?: string;
 
+  @Column("varchar", { name: "imagen", nullable: true, length: 255 })
+  imagen: string | null;
+
   @Column("int", { name: "id_tipo_usuario" })
   idTipoUsuario: number;
 

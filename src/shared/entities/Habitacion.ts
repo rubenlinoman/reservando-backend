@@ -45,6 +45,9 @@ export class Habitacion {
   })
   descuento: string | null;
 
+  @Column("varchar", { name: "imagen", nullable: true, length: 255 })
+  imagen: string | null;
+
   @Column("int", { name: "id_alojamiento", nullable: true })
   idAlojamiento: number | null;
 

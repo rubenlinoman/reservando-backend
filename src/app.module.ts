@@ -3,11 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import * as entity from './shared/entities' ;  // Importa todas las entidades desde el índice
+import * as entity from './shared/entities'; // Importa todas las entidades desde el índice
 
 import { AuthModule } from './auth/auth.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { MailModule } from './mail/mail.module';
+import { AlojamientoModule } from './alojamiento/alojamiento.module';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { MailModule } from './mail/mail.module';
       // Entidades de la base de datos
       entities: [
         entity.Alojamiento,
-        entity.EstadoAlojamiento,
+        entity.EstadoReserva,
         entity.Habitacion,
         entity.Reserva,
         entity.TipoAlojamiento,
@@ -38,6 +39,7 @@ import { MailModule } from './mail/mail.module';
     AuthModule,
     MailModule,
     UsuarioModule,
+    AlojamientoModule,
   ],
   controllers: [],
   providers: [AppService],
