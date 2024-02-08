@@ -13,7 +13,9 @@ import { MailModule } from 'src/mail/mail.module';
   imports: [
     MailModule,
     ConfigModule.forRoot(), // Lo llamamos para poder acceder a las variables de entorno en el jwtModule
-    TypeOrmModule.forFeature([Usuario]),
+    TypeOrmModule.forFeature([
+      Usuario
+    ]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,

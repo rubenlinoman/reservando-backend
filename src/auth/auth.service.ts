@@ -79,17 +79,11 @@ export class AuthService {
    * @param registerDto - email, nombre, apellidos, password
    * @returns devuelve el token
    */
-  async register(registerDto: RegisterDto): Promise<LoginResponse> {
-
-    console.log('registerDto', registerDto);
-    
+  async register(registerDto: RegisterDto): Promise<LoginResponse> {    
 
     const user = await this.crear(registerDto);
-    console.log('user', user);
     
     const token = this.getJwtToken({ email: user.email, usuario: user.usuario, });
-
-    console.log('Registro exitoso:', user);
 
     return {
       user: user,
@@ -103,30 +97,23 @@ export class AuthService {
    * @returns devuelve el usuario
    */
   async crear(registerDto: RegisterDto) {
-    console.log('registerDto', registerDto);
     
     try {
       const { password, ...userData } = registerDto;
-      console.log('userData', userData);
       
       const passEncriptada = bcryptjs.hashSync(password, 10);
 
-      console.log('passEncriptada', passEncriptada);
       // 1- Crea el usuario
       const newUser = this.usuarioRepository.create({
         password: passEncriptada,
         ...userData,
       });
-
-      console.log('newUser', newUser);
       
       // 2- Guardar el usuario
       await this.usuarioRepository.insert(newUser);
 
       // 3- Elimina el Pass para devolverlo en el array
       const { password:_, ...user } = newUser;
-
-      console.log('user', user);
       
       return user;
 

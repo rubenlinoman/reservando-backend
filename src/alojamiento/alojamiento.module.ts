@@ -7,7 +7,7 @@ import { MailModule } from 'src/mail/mail.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Alojamiento, Usuario } from 'src/shared/entities';
+import { Alojamiento, TipoAlojamiento, Usuario } from 'src/shared/entities';
 
 @Module({
   controllers: [AlojamientoController],
@@ -17,7 +17,8 @@ import { Alojamiento, Usuario } from 'src/shared/entities';
     ConfigModule.forRoot(), // Lo llamamos para poder acceder a las variables de entorno en el jwtModule
     TypeOrmModule.forFeature([
       Alojamiento,
-      Usuario,
+      TipoAlojamiento,
+      Usuario
     ]),
     JwtModule.register({
       global: true,

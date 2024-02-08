@@ -35,11 +35,21 @@ export class AuthController {
       }
     }
 
+    /**
+     * Método para enviar el mail de cambio de password
+     * @param forgotPasswordDto - email y base url
+     * @returns 
+     */
     @Post('password-recovery')
     passwordRecovery(@Body() forgotPasswordDto: ForgotPasswordDto) {
       return this.authService.forgotPassword(forgotPasswordDto);
     }
 
+    /**
+     * Método para cambiar la contraseña
+     * @param passwordChangeDto - email y password 
+     * @returns 
+     */
     @Patch('password-change')
     passwordChange( 
       @Body() passwordChangeDto: PasswordChangeDto
