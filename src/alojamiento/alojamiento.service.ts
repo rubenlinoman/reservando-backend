@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
-import { CreateAlojamientoDTO } from './dto';
+import { CreateAlojamientoDTO, UpdateAccommodationDTO } from './dto';
 
 @Injectable()
 export class AlojamientoService {
@@ -12,8 +12,6 @@ export class AlojamientoService {
     private alojamientoRepository: Repository<Alojamiento>,
     @InjectRepository(TipoAlojamiento)
     private tipoAlojamientoRepository: Repository<TipoAlojamiento>,
-    @InjectRepository(Usuario)
-    private usuarioRepository: Repository<Usuario>,
   ) {}
 
   /**
@@ -22,6 +20,19 @@ export class AlojamientoService {
    */
   findAll(): Promise<Alojamiento[]> {
     return this.alojamientoRepository.find();
+  }
+
+  findAllTypes(): Promise<TipoAlojamiento[]> {
+    return this.tipoAlojamientoRepository.find();
+  }
+
+  /**
+   * Método para obtener un alojamientoS
+   * @param idAlojamiento - identificador del alojamiento
+   * @returns devuelve el alojamiento
+   */
+  findAccommodationById(idAlojamiento: number) {
+    return this.alojamientoRepository.findOneBy({ idAlojamiento: idAlojamiento });
   }
 
   /**
@@ -53,16 +64,23 @@ export class AlojamientoService {
    * @param createAlojamientoDto - parametros para crear el alojamiento
    * @returns devuelve el alojamiento
    */
-  async create(createAlojamientoDto: CreateAlojamientoDTO) {
+  async create(createAlojamientoDto: CreateAlojamientoDTO, image: Express.Multer.File) {
     try {
-      // 1- Crea el icono
+
+      console.log('createAlojamientoDto: ', createAlojamientoDto);
+      
+      
+      // 1- Crea el alojamiento
       const newAccomodation = this.alojamientoRepository.create({
         ...createAlojamientoDto,
+        imagen: image.filename
       });
-      
-      // 2- Guardar el icono
+
+      // 2- Guardar el alojamiento
       await this.alojamientoRepository.insert(newAccomodation);
 
+      console.log('newAccomodation después de create: ', newAccomodation);
+      
       return newAccomodation;
 
     } catch (error) {
@@ -70,11 +88,42 @@ export class AlojamientoService {
     }
   }
 
+  async updateAccommodation(updateAccommodationDto: UpdateAccommodationDTO, image: Express.Multer.File) {
+    const { idAlojamiento, ...update } = updateAccommodationDto;
+
+    try {
+        let newUpdate: any = { ...update };
+
+        console.log('updateAccommodationDto: ', updateAccommodationDto);
+        
+        // Verificar si se proporciona una nueva imagen
+        if (image) {
+          console.log('image: ', image);
+          
+            // Si hay una nueva imagen, inclúyela en la actualización
+            newUpdate = {
+                ...newUpdate,
+                imagen: image.filename
+            };
+        }
+
+        // Actualizar el alojamiento en la base de datos
+        const exito = await this.alojamientoRepository.update(idAlojamiento, newUpdate);
+
+        return exito.affected;
+    } catch (error) {
+        throw new BadRequestException(`Error al actualizar el alojamiento: ${error}`);
+    }
+}
+
+  
+
   /**
-   * Método para obtener todos los tipos de alojamientos
-   * @returns Todos los tipos de alojamientos
+   * Método para borrar un alojamiento
+   * @param idAlojamiento - identificador del alojamiento
+   * @returns devuelve el alojamiento
    */
-  getAccommodationTypes(): Promise<TipoAlojamiento[]> {
-    return this.tipoAlojamientoRepository.find();
+  removeAccommodation(idAlojamiento: number) {
+    return this.alojamientoRepository.delete(idAlojamiento);
   }
 }

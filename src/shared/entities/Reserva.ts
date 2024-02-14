@@ -9,6 +9,7 @@ import {
 import { Usuario } from "./Usuario";
 import { Habitacion } from "./Habitacion";
 import { EstadoReserva } from "./EstadoReserva";
+import { Alojamiento } from "./Alojamiento"; // Importa la entidad Alojamiento si aún no lo has hecho
 
 @Index("id_usuario", ["idUsuario"], {})
 @Index("id_habitacion", ["idHabitacion"], {})
@@ -20,6 +21,9 @@ export class Reserva {
 
   @Column("int", { name: "id_usuario", nullable: true })
   idUsuario: number | null;
+
+  @Column("int", { name: "id_alojamiento", nullable: true }) // Agregado id_alojamiento
+  idAlojamiento: number | null; // Agregado id_alojamiento
 
   @Column("int", { name: "id_habitacion", nullable: true })
   idHabitacion: number | null;
@@ -39,6 +43,13 @@ export class Reserva {
   })
   @JoinColumn([{ name: "id_usuario", referencedColumnName: "idUsuario" }])
   idUsuario2: Usuario;
+
+  @ManyToOne(() => Alojamiento, (alojamiento) => alojamiento.reservas, { // Relación con Alojamiento
+    onDelete: "RESTRICT",
+    onUpdate: "RESTRICT",
+  })
+  @JoinColumn([{ name: "id_alojamiento", referencedColumnName: "idAlojamiento" }]) // Relación con Alojamiento
+  idAlojamiento2: Alojamiento; // Relación con Alojamiento
 
   @ManyToOne(() => Habitacion, (habitacion) => habitacion.reservas, {
     onDelete: "RESTRICT",

@@ -1,7 +1,19 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { AlojamientoService } from './alojamiento.service';
 import { Alojamiento, TipoAlojamiento } from 'src/shared/entities';
-import { CreateAlojamientoDTO } from './dto';
+import { AlojamientoService } from './alojamiento.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { CreateAlojamientoDTO, UpdateAccommodationDTO } from './dto';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('alojamiento')
 export class AlojamientoController {
@@ -14,6 +26,21 @@ export class AlojamientoController {
   @Get()
   findAll(): Promise<Alojamiento[]> {
     return this.alojamientoService.findAll();
+  }
+
+  @Get('tipos')
+  finAllTypes(): Promise<TipoAlojamiento[]> {
+    return this.alojamientoService.findAllTypes();
+  }
+
+  /**
+   * Método para obtener un alojamiento
+   * @param idAlojamiento - identificador del alojamiento
+   * @returns devuelve el alojamiento
+   */
+  @Get(':idAlojamiento')
+  findClienteById(@Param('idAlojamiento') idAlojamiento: number) {
+    return this.alojamientoService.findAccommodationById(idAlojamiento);
   }
 
   /**
@@ -33,19 +60,76 @@ export class AlojamientoController {
   /**
    * Método para crear un alojamiento
    * @param createAlojamientoDto - datos para crear el alojamiento
-   * @returns 
+   * @returns
    */
   @Post()
-  create(@Body() createAlojamientoDto: CreateAlojamientoDTO) {
-    return this.alojamientoService.create(createAlojamientoDto);
+  @UseInterceptors(
+    FileInterceptor('imagen', {
+      storage: diskStorage({
+        destination: './public/images/', // TODO Esto no tengo del todo claro donde tenemos que ponerlo pero así funciona por el momento
+        filename: (req, file, cb) => {
+          const codigo =
+            Math.random().toString(32).substring(2) + Date.now().toString(32);
+          const extension =
+            '.' +
+            file.originalname.split('.')[
+              file.originalname.split('.').length - 1
+            ];
+          const inicio = file.originalname.split('.')[0];
+          const filtrada = inicio.replace(/[^\w]/gi, '');
+          const nombre = filtrada + '_' + codigo + extension;
+
+          cb(null, `${nombre}`);
+        },
+      }),
+    }),
+  )
+  create(
+    @UploadedFile() image: Express.Multer.File,
+    @Body() createAlojamientoDto: CreateAlojamientoDTO,
+  ): Promise<Alojamiento> {
+    return this.alojamientoService.create(createAlojamientoDto, image);
+  }
+
+  @Patch()
+  @UseInterceptors(
+    FileInterceptor('imagen', {
+      storage: diskStorage({
+        destination: './public/images/', // TODO Esto no tengo del todo claro donde tenemos que ponerlo pero así funciona por el momento
+        filename: (req, file, cb) => {
+          const codigo =
+            Math.random().toString(32).substring(2) + Date.now().toString(32);
+          const extension =
+            '.' +
+            file.originalname.split('.')[
+              file.originalname.split('.').length - 1
+            ];
+          const inicio = file.originalname.split('.')[0];
+          const filtrada = inicio.replace(/[^\w]/gi, '');
+          const nombre = filtrada + '_' + codigo + extension;
+
+          cb(null, `${nombre}`);
+        },
+      }),
+    }),
+  )
+  updateAccommodation(
+    @UploadedFile() image: Express.Multer.File,
+    @Body() updateAccommodationDto: UpdateAccommodationDTO,
+  ): Promise<Number> {
+    return this.alojamientoService.updateAccommodation(
+      updateAccommodationDto,
+      image,
+    );
   }
 
   /**
-   * Método para obtener todos los tipos de alojamientos
-   * @returns Todos los tipos de alojamientos
+   * Método para eliminar un alojamiento
+   * @param idAlojamiento - Id del alojamiento
+   * @returns devuelve el alojamiento eliminado
    */
-  @Get('tipos')
-  getAccommodationTypes(): Promise<TipoAlojamiento[]> {
-    return this.alojamientoService.getAccommodationTypes();
+  @Delete(':id')
+  removeImagen(@Param('id') idAlojamiento: number) {
+    return this.alojamientoService.removeAccommodation(idAlojamiento);
   }
 }

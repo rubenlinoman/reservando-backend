@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { MailModule } from './mail/mail.module';
 import { AlojamientoModule } from './alojamiento/alojamiento.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -33,6 +35,11 @@ import { AlojamientoModule } from './alojamiento/alojamiento.module';
         entity.Usuario
       ],
       synchronize: false,
+    }),
+
+    // Archivos estáticos
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../public')
     }),
 
     // Módulos de la aplicación

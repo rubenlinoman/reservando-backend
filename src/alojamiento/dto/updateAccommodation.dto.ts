@@ -1,7 +1,10 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
-export class CreateAlojamientoDTO {
-  @IsNotEmpty()
+export class UpdateAccommodationDTO {
+  @IsString()
+  idAlojamiento: number;
+
+  @IsOptional()
   @IsString()
   nombreAlojamiento: string;
 
@@ -9,15 +12,14 @@ export class CreateAlojamientoDTO {
   @IsString()
   descripcion: string | null;
 
+  @IsOptional()
   @IsString()
   capacidad: number;
 
-  @IsNotEmpty()
-  @IsString()
+  @IsOptional()
   ciudad: string | null;
 
   @IsOptional()
-  @IsString()
   imagen: string | null;
 
   @IsString()

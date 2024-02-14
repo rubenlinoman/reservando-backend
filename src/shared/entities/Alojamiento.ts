@@ -10,6 +10,7 @@ import {
 import { TipoAlojamiento } from "./TipoAlojamiento";
 import { Usuario } from "./Usuario";
 import { Habitacion } from "./Habitacion";
+import { Reserva } from "./Reserva"; // Añade la importación de la entidad Reserva
 
 @Index("id_tipo_alojamiento", ["idTipoAlojamiento"], {})
 @Index("id_propietario", ["idPropietario"], {})
@@ -58,4 +59,8 @@ export class Alojamiento {
 
   @OneToMany(() => Habitacion, (habitacion) => habitacion.idAlojamiento2)
   habitacions: Habitacion[];
+
+  // Agrega la relación con Reserva
+  @OneToMany(() => Reserva, (reserva) => reserva.idAlojamiento2)
+  reservas: Reserva[];
 }
