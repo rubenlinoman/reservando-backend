@@ -9,8 +9,8 @@ import {
 } from "typeorm";
 import { TipoAlojamiento } from "./TipoAlojamiento";
 import { Usuario } from "./Usuario";
+import { Reserva } from "./Reserva";
 import { Habitacion } from "./Habitacion";
-import { Reserva } from "./Reserva"; // Añade la importación de la entidad Reserva
 
 @Index("id_tipo_alojamiento", ["idTipoAlojamiento"], {})
 @Index("id_propietario", ["idPropietario"], {})
@@ -57,10 +57,9 @@ export class Alojamiento {
   @JoinColumn([{ name: "id_propietario", referencedColumnName: "idUsuario" }])
   idPropietario2: Usuario;
 
-  @OneToMany(() => Habitacion, (habitacion) => habitacion.idAlojamiento2)
-  habitacions: Habitacion[];
-
-  // Agrega la relación con Reserva
   @OneToMany(() => Reserva, (reserva) => reserva.idAlojamiento2)
   reservas: Reserva[];
+
+  @OneToMany(() => Habitacion, (habitacion) => habitacion.idAlojamiento2)
+  habitacions: Habitacion[];
 }

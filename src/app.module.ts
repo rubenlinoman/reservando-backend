@@ -11,6 +11,7 @@ import { MailModule } from './mail/mail.module';
 import { AlojamientoModule } from './alojamiento/alojamiento.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { HabitacionModule } from './habitacion/habitacion.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { join } from 'path';
         entity.Alojamiento,
         entity.EstadoReserva,
         entity.Habitacion,
+        entity.TipoHabitacion,
         entity.Reserva,
         entity.TipoAlojamiento,
         entity.TipoUsuario,
@@ -39,14 +41,18 @@ import { join } from 'path';
 
     // Archivos estáticos
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../public')
+      rootPath: join(__dirname, '../public'),
+      serveStaticOptions: {
+        index: false
+      }
     }),
 
     // Módulos de la aplicación
+    AlojamientoModule,
     AuthModule,
+    HabitacionModule,
     MailModule,
     UsuarioModule,
-    AlojamientoModule,
   ],
   controllers: [],
   providers: [AppService],

@@ -1,4 +1,4 @@
-import { Alojamiento, TipoAlojamiento, Usuario } from 'src/shared/entities';
+import { Alojamiento, TipoAlojamiento } from 'src/shared/entities';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -22,6 +22,10 @@ export class AlojamientoService {
     return this.alojamientoRepository.find();
   }
 
+  /**
+   * Método para obtener todos los tipos de alojamientos
+   * @returns devuelve un arreglo de tipos de alojamientos
+   */
   findAllTypes(): Promise<TipoAlojamiento[]> {
     return this.tipoAlojamientoRepository.find();
   }
@@ -41,10 +45,7 @@ export class AlojamientoService {
    * @param idTipoUsuario identificador del tipo de usuario
    * @returns devuelve un arreglo de alojamientos
    */
-  async findAllByUserId(
-    idUsuario: number,
-    idTipoUsuario: number,
-  ): Promise<Alojamiento[]> {
+  async findAllByUserId(idUsuario: number, idTipoUsuario: number): Promise<Alojamiento[]> {
     let query = `SELECT id_alojamiento as idAlojamiento, nombre_alojamiento as nombreAlojamiento, 
     descripcion, capacidad, ciudad, imagen, id_tipo_alojamiento as idTipoAlojamiento, 
     id_propietario as idPropietario FROM alojamiento WHERE id_propietario = ${idUsuario}`;

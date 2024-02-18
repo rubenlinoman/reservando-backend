@@ -148,14 +148,14 @@ export class AuthService {
     const { nombre, apellidos } = user;
     const name = nombre;
     const lastName = apellidos;
-    const ForgotPasswordMail: ForgotPasswordMail = {
+    const forgotPasswordMail: ForgotPasswordMail = {
       email: email,
       nombre: name,
       apellidos: lastName,
       baseUrl: baseUrl
     }
 
-    return this.mailService.sendForgotPasswordMail(ForgotPasswordMail);
+    return this.mailService.sendForgotPasswordMail(forgotPasswordMail);
   }
 
   /**

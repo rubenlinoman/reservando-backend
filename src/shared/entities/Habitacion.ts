@@ -9,8 +9,10 @@ import {
 } from "typeorm";
 import { Reserva } from "./Reserva";
 import { Alojamiento } from "./Alojamiento";
+import { TipoHabitacion } from "./TipoHabitacion";
 
 @Index("id_alojamiento", ["idAlojamiento"], {})
+@Index("id_tipo_habitacion", ["idTipoHabitacion"], {})
 @Entity("habitacion", { schema: "ReservAndo" })
 export class Habitacion {
   @PrimaryGeneratedColumn({ type: "int", name: "id_habitacion" })
@@ -51,6 +53,9 @@ export class Habitacion {
   @Column("int", { name: "id_alojamiento", nullable: true })
   idAlojamiento: number | null;
 
+  @Column("int", { name: "id_tipo_habitacion", nullable: true })
+  idTipoHabitacion: number | null;
+
   @OneToMany(() => Reserva, (reserva) => reserva.idHabitacion2)
   reservas: Reserva[];
 
@@ -62,4 +67,14 @@ export class Habitacion {
     { name: "id_alojamiento", referencedColumnName: "idAlojamiento" },
   ])
   idAlojamiento2: Alojamiento;
+
+  @ManyToOne(
+    () => TipoHabitacion,
+    (tipoHabitacion) => tipoHabitacion.habitacions,
+    { onDelete: "RESTRICT", onUpdate: "RESTRICT" }
+  )
+  @JoinColumn([
+    { name: "id_tipo_habitacion", referencedColumnName: "idTipoHabitacion" },
+  ])
+  idTipoHabitacion2: TipoHabitacion;
 }

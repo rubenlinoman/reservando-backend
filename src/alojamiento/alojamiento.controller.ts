@@ -20,7 +20,7 @@ export class AlojamientoController {
   constructor(private readonly alojamientoService: AlojamientoService) {}
 
   /**
-   * Método para obtener todos los alojamientos
+   * Controlador para obtener todos los alojamientos
    * @returns Todos los alojamientos
    */
   @Get()
@@ -28,23 +28,27 @@ export class AlojamientoController {
     return this.alojamientoService.findAll();
   }
 
+  /**
+   * Controlador para obtener todos los tipos de alojamientos
+   * @returns Todos los tipos de alojamientos
+   */
   @Get('tipos')
   finAllTypes(): Promise<TipoAlojamiento[]> {
     return this.alojamientoService.findAllTypes();
   }
 
   /**
-   * Método para obtener un alojamiento
+   * Controlador para obtener un alojamiento
    * @param idAlojamiento - identificador del alojamiento
    * @returns devuelve el alojamiento
    */
   @Get(':idAlojamiento')
-  findClienteById(@Param('idAlojamiento') idAlojamiento: number) {
+  findClienteById(@Param('idAlojamiento') idAlojamiento: number): Promise<Alojamiento> {
     return this.alojamientoService.findAccommodationById(idAlojamiento);
   }
 
   /**
-   * Método para obtener todos los alojamientos de un usuario
+   * Controlador para obtener todos los alojamientos de un usuario
    * @param idUsuario - id del usuario al que pertenece el alojamiento
    * @param idTipoUsuario - id del tipo de usuario
    * @returns devuelve un arreglo de alojamientos
@@ -58,15 +62,15 @@ export class AlojamientoController {
   }
 
   /**
-   * Método para crear un alojamiento
+   * Controlador para crear un alojamiento
    * @param createAlojamientoDto - datos para crear el alojamiento
-   * @returns
+   * @returns devuelve el alojamiento creado
    */
   @Post()
   @UseInterceptors(
     FileInterceptor('imagen', {
       storage: diskStorage({
-        destination: './public/images/', // TODO Esto no tengo del todo claro donde tenemos que ponerlo pero así funciona por el momento
+        destination: './public/images/',
         filename: (req, file, cb) => {
           const codigo =
             Math.random().toString(32).substring(2) + Date.now().toString(32);
@@ -91,11 +95,17 @@ export class AlojamientoController {
     return this.alojamientoService.create(createAlojamientoDto, image);
   }
 
+  /**
+   * Controlador para actualizar un alojamiento
+   * @param image - imagen
+   * @param updateAccommodationDto - datos para actualizar el alojamiento
+   * @returns devuelve el alojamiento actualizado
+   */
   @Patch()
   @UseInterceptors(
     FileInterceptor('imagen', {
       storage: diskStorage({
-        destination: './public/images/', // TODO Esto no tengo del todo claro donde tenemos que ponerlo pero así funciona por el momento
+        destination: './public/images/', 
         filename: (req, file, cb) => {
           const codigo =
             Math.random().toString(32).substring(2) + Date.now().toString(32);
@@ -124,12 +134,12 @@ export class AlojamientoController {
   }
 
   /**
-   * Método para eliminar un alojamiento
+   * Controlador para eliminar un alojamiento
    * @param idAlojamiento - Id del alojamiento
    * @returns devuelve el alojamiento eliminado
    */
   @Delete(':id')
-  removeImagen(@Param('id') idAlojamiento: number) {
+  removeAccommodation(@Param('id') idAlojamiento: number) {
     return this.alojamientoService.removeAccommodation(idAlojamiento);
   }
 }

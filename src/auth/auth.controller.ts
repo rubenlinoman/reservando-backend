@@ -14,16 +14,31 @@ export class AuthController {
         private readonly authService: AuthService
     ) {}
 
+    /**
+     * Controlador para iniciar sesión
+     * @param loginDto - email y password
+     * @returns datos del usuario
+     */
     @Post('/login')
     login(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
     }
 
+    /**
+     * Controlador para registrar un usuario
+     * @param registerDto - email, password, nombre, apellidos
+     * @returns devuelve el usuario y el token
+     */
     @Post('/register')
     registro(@Body() registerDto: RegisterDto) {
       return this.authService.register(registerDto);
     }
 
+    /**
+     * Controlador para obtener el token
+     * @param user - email y password
+     * @returns devuelve el token
+     */
     @UseGuards( AuthGuard )
     @Get('/check-token')
     checkToken( @Request() req: Request ): LoginResponse {
@@ -36,9 +51,9 @@ export class AuthController {
     }
 
     /**
-     * Método para enviar el mail de cambio de password
+     * Controlador para enviar el mail de cambio de password
      * @param forgotPasswordDto - email y base url
-     * @returns 
+     * @returns devuelve el nombre, apellidos, el email y la url
      */
     @Post('password-recovery')
     passwordRecovery(@Body() forgotPasswordDto: ForgotPasswordDto) {
@@ -46,9 +61,9 @@ export class AuthController {
     }
 
     /**
-     * Método para cambiar la contraseña
+     * Controlador para cambiar la contraseña
      * @param passwordChangeDto - email y password 
-     * @returns 
+     * @returns devuelve el emsil, nombre, apellidos y la url
      */
     @Patch('password-change')
     passwordChange( 

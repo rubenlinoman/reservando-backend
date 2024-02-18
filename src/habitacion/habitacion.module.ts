@@ -1,22 +1,21 @@
-import { AlojamientoController } from './alojamiento.controller';
-import { AlojamientoService } from './alojamiento.service';
+import { AuthService } from 'src/auth/auth.service';
 import { ConfigModule } from '@nestjs/config';
+import { HabitacionController } from './habitacion.controller';
+import { HabitacionService } from './habitacion.service';
 import { JwtModule } from '@nestjs/jwt';
-import { MailModule } from 'src/mail/mail.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Alojamiento, TipoAlojamiento } from 'src/shared/entities';
+import { Habitacion, TipoHabitacion } from 'src/shared/entities';
 
 @Module({
-  controllers: [AlojamientoController],
-  providers: [AlojamientoService],
+  controllers: [HabitacionController],
+  providers: [HabitacionService],
   imports: [
-    MailModule,
     ConfigModule.forRoot(), // Lo llamamos para poder acceder a las variables de entorno en el jwtModule
     TypeOrmModule.forFeature([
-      Alojamiento,
-      TipoAlojamiento,
+      Habitacion,
+      TipoHabitacion,
     ]),
     JwtModule.register({
       global: true,
@@ -25,4 +24,4 @@ import { Alojamiento, TipoAlojamiento } from 'src/shared/entities';
     }),
   ]
 })
-export class AlojamientoModule {}
+export class HabitacionModule {}
