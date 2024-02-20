@@ -29,6 +29,15 @@ export class AlojamientoController {
   }
 
   /**
+   * Controlador para obtener todos los alojamientos para la home
+   * @returns Todos los alojamientos para la home
+   */
+  @Get('home')
+  findAllHomePage(): Promise<Alojamiento[]> {
+    return this.alojamientoService.findAllHomePage();
+  }
+
+  /**
    * Controlador para obtener todos los tipos de alojamientos
    * @returns Todos los tipos de alojamientos
    */
@@ -43,7 +52,7 @@ export class AlojamientoController {
    * @returns devuelve el alojamiento
    */
   @Get(':idAlojamiento')
-  findClienteById(@Param('idAlojamiento') idAlojamiento: number): Promise<Alojamiento> {
+  findAccommodationById(@Param('idAlojamiento') idAlojamiento: number): Promise<Alojamiento> {
     return this.alojamientoService.findAccommodationById(idAlojamiento);
   }
 

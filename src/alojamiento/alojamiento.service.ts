@@ -23,6 +23,19 @@ export class AlojamientoService {
   }
 
   /**
+   * Método para obtener todos los alojamientos para la home
+   * @returns devuelve un arreglo de alojamientos con campos precio y enOferta
+   */
+  findAllHomePage(): Promise<Alojamiento[]> {
+    const query = `SELECT a.id_alojamiento AS idAlojamiento, a.nombre_alojamiento AS nombreAlojamiento, 
+    a.descripcion, a.capacidad, a.ciudad, a.imagen, a.id_tipo_alojamiento AS idTipoAlojamiento, a.id_propietario AS idPropietario, 
+    h.precio, h.en_oferta AS enOferta FROM alojamiento a LEFT JOIN ( SELECT id_alojamiento, MIN(precio) AS precio, 
+    en_oferta FROM habitacion GROUP BY id_alojamiento ) h ON a.id_alojamiento = h.id_alojamiento; `;
+
+    return this.alojamientoRepository.query(query);
+  }
+
+  /**
    * Método para obtener todos los tipos de alojamientos
    * @returns devuelve un arreglo de tipos de alojamientos
    */
@@ -36,7 +49,9 @@ export class AlojamientoService {
    * @returns devuelve el alojamiento
    */
   findAccommodationById(idAlojamiento: number) {
-    return this.alojamientoRepository.findOneBy({ idAlojamiento: idAlojamiento });
+    return this.alojamientoRepository.findOneBy({
+      idAlojamiento: idAlojamiento,
+    });
   }
 
   /**
@@ -45,7 +60,10 @@ export class AlojamientoService {
    * @param idTipoUsuario identificador del tipo de usuario
    * @returns devuelve un arreglo de alojamientos
    */
-  async findAllByUserId(idUsuario: number, idTipoUsuario: number): Promise<Alojamiento[]> {
+  async findAllByUserId(
+    idUsuario: number,
+    idTipoUsuario: number,
+  ): Promise<Alojamiento[]> {
     let query = `SELECT id_alojamiento as idAlojamiento, nombre_alojamiento as nombreAlojamiento, 
     descripcion, capacidad, ciudad, imagen, id_tipo_alojamiento as idTipoAlojamiento, 
     id_propietario as idPropietario FROM alojamiento WHERE id_propietario = ${idUsuario}`;
@@ -65,59 +83,63 @@ export class AlojamientoService {
    * @param createAlojamientoDto - parametros para crear el alojamiento
    * @returns devuelve el alojamiento
    */
-  async create(createAlojamientoDto: CreateAlojamientoDTO, image: Express.Multer.File) {
+  async create(
+    createAlojamientoDto: CreateAlojamientoDTO,
+    image: Express.Multer.File,
+  ) {
     try {
-
       console.log('createAlojamientoDto: ', createAlojamientoDto);
-      
-      
+
       // 1- Crea el alojamiento
       const newAccomodation = this.alojamientoRepository.create({
         ...createAlojamientoDto,
-        imagen: image.filename
+        imagen: image.filename,
       });
 
       // 2- Guardar el alojamiento
       await this.alojamientoRepository.insert(newAccomodation);
 
       console.log('newAccomodation después de create: ', newAccomodation);
-      
-      return newAccomodation;
 
+      return newAccomodation;
     } catch (error) {
       throw new BadRequestException(`Error al crear el alojamiento: ${error}`);
     }
   }
 
-  async updateAccommodation(updateAccommodationDto: UpdateAccommodationDTO, image: Express.Multer.File) {
+  async updateAccommodation(
+    updateAccommodationDto: UpdateAccommodationDTO,
+    image: Express.Multer.File,
+  ) {
     const { idAlojamiento, ...update } = updateAccommodationDto;
 
     try {
-        let newUpdate: any = { ...update };
+      let newUpdate: any = { ...update };
 
-        console.log('updateAccommodationDto: ', updateAccommodationDto);
-        
-        // Verificar si se proporciona una nueva imagen
-        if (image) {
-          console.log('image: ', image);
-          
-            // Si hay una nueva imagen, inclúyela en la actualización
-            newUpdate = {
-                ...newUpdate,
-                imagen: image.filename
-            };
-        }
+      // Verificar si se proporciona una nueva imagen
+      if (image) {
+        console.log('image: ', image);
 
-        // Actualizar el alojamiento en la base de datos
-        const exito = await this.alojamientoRepository.update(idAlojamiento, newUpdate);
+        // Si hay una nueva imagen, inclúyela en la actualización
+        newUpdate = {
+          ...newUpdate,
+          imagen: image.filename,
+        };
+      }
 
-        return exito.affected;
+      // Actualizar el alojamiento en la base de datos
+      const exito = await this.alojamientoRepository.update(
+        idAlojamiento,
+        newUpdate,
+      );
+
+      return exito.affected;
     } catch (error) {
-        throw new BadRequestException(`Error al actualizar el alojamiento: ${error}`);
+      throw new BadRequestException(
+        `Error al actualizar el alojamiento: ${error}`,
+      );
     }
-}
-
-  
+  }
 
   /**
    * Método para borrar un alojamiento

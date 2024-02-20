@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Habitacion, TipoHabitacion } from 'src/shared/entities';
 import { Repository } from 'typeorm';
+import { CreateHabitacionDTO, UpdateRoomDTO } from './dto';
 
 @Injectable()
 export class HabitacionService {
@@ -21,6 +22,15 @@ export class HabitacionService {
   }
 
   /**
+   * Método para obtener una habitación
+   * @param idHabitacion - identificador de la habitación
+   * @returns devuelve la habitación
+   */
+  findRoomById(idHabitacion: number): Promise<Habitacion> {
+    return this.habitacionRepository.findOneBy({ idHabitacion: idHabitacion });
+  }
+
+  /**
    * Método para obtener todos los tipos de habitaciones
    * @returns devuelve un arreglo de tipos de habitaciones
    */
@@ -35,6 +45,76 @@ export class HabitacionService {
    */
   findAllByAccommodationId(idAlojamiento: number): Promise<Habitacion[]> {
     return this.habitacionRepository.findBy({ idAlojamiento: idAlojamiento });
+  }
+
+  /**
+   * Método para crear una habitacion
+   * @param createHabitacionDto - datos para crear la habitacion
+   * @param image - imagen
+   * @returns  devuelve la habitacion creada
+   */
+  async create(createHabitacionDto: CreateHabitacionDTO, image: Express.Multer.File) {
+    try {
+
+      console.log('createHabitacionDto: ', createHabitacionDto);      
+      
+      // 1- Crea el alojamiento
+      const newRoom= this.habitacionRepository.create({
+        ...createHabitacionDto,
+        imagen: image.filename
+      });
+
+      // 2- Guardar el alojamiento
+      await this.habitacionRepository.insert(newRoom);
+
+      console.log('newRoom después de create: ', newRoom);
+      
+      return newRoom;
+
+    } catch (error) {
+      throw new BadRequestException(`Error al crear la habitacion: ${error}`);
+    }
+  }
+
+  /**
+   * Método para actualizar una habitacion
+   * @param updateRoomnDto - parametros para actualizar la habitacion
+   * @param image - imagen
+   * @returns devuelve el numero de filas afectadas
+   */
+  async updateRoom(
+    updateRoomnDto: UpdateRoomDTO,
+    image: Express.Multer.File,
+  ) {
+    const { idHabitacion, ...update } = updateRoomnDto;
+
+    try {
+      let newUpdate: any = { ...update };
+
+      // Verificar si se proporciona una nueva imagen
+      if (image) {
+        console.log('image: ', image);
+
+        // Si hay una nueva imagen, inclúyela en la actualización
+        newUpdate = {
+          ...newUpdate,
+          imagen: image.filename,
+        };
+        
+      }
+
+      // Actualizar el alojamiento en la base de datos
+      const exito = await this.habitacionRepository.update(
+        idHabitacion,
+        newUpdate,
+      );
+
+      return exito.affected;
+    } catch (error) {
+      throw new BadRequestException(
+        `Error al actualizar la habitación: ${error}`,
+      );
+    }
   }
 
   /**
