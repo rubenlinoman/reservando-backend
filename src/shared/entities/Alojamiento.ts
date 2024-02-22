@@ -28,6 +28,9 @@ export class Alojamiento {
   @Column("int", { name: "capacidad" })
   capacidad: number;
 
+  @Column("varchar", { name: "direccion", nullable: true, length: 255 })
+  direccion: string | null;
+
   @Column("varchar", { name: "ciudad", nullable: true, length: 255 })
   ciudad: string | null;
 

@@ -17,6 +17,9 @@ export class UpdateAccommodationDTO {
   capacidad: number;
 
   @IsOptional()
+  direccion: string | null;
+
+  @IsOptional()
   ciudad: string | null;
 
   @IsOptional()

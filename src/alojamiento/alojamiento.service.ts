@@ -65,13 +65,13 @@ export class AlojamientoService {
     idTipoUsuario: number,
   ): Promise<Alojamiento[]> {
     let query = `SELECT id_alojamiento as idAlojamiento, nombre_alojamiento as nombreAlojamiento, 
-    descripcion, capacidad, ciudad, imagen, id_tipo_alojamiento as idTipoAlojamiento, 
+    descripcion, capacidad, direccion, ciudad, imagen, id_tipo_alojamiento as idTipoAlojamiento, 
     id_propietario as idPropietario FROM alojamiento WHERE id_propietario = ${idUsuario}`;
 
     // Si el usuario es administrador devuelve todos los alojamientos
     if (idTipoUsuario == 3) {
       query = `SELECT id_alojamiento as idAlojamiento, nombre_alojamiento as nombreAlojamiento, 
-      descripcion, capacidad, ciudad, imagen, id_tipo_alojamiento as idTipoAlojamiento, 
+      descripcion, capacidad, direccion, ciudad, imagen, id_tipo_alojamiento as idTipoAlojamiento, 
       id_propietario as idPropietario FROM alojamiento`;
     }
 
@@ -88,8 +88,6 @@ export class AlojamientoService {
     image: Express.Multer.File,
   ) {
     try {
-      console.log('createAlojamientoDto: ', createAlojamientoDto);
-
       // 1- Crea el alojamiento
       const newAccomodation = this.alojamientoRepository.create({
         ...createAlojamientoDto,
@@ -98,8 +96,6 @@ export class AlojamientoService {
 
       // 2- Guardar el alojamiento
       await this.alojamientoRepository.insert(newAccomodation);
-
-      console.log('newAccomodation después de create: ', newAccomodation);
 
       return newAccomodation;
     } catch (error) {
@@ -118,7 +114,6 @@ export class AlojamientoService {
 
       // Verificar si se proporciona una nueva imagen
       if (image) {
-        console.log('image: ', image);
 
         // Si hay una nueva imagen, inclúyela en la actualización
         newUpdate = {

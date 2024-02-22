@@ -14,6 +14,10 @@ export class CreateAlojamientoDTO {
 
   @IsNotEmpty()
   @IsString()
+  direccion: string | null;
+
+  @IsNotEmpty()
+  @IsString()
   ciudad: string | null;
 
   @IsOptional()
