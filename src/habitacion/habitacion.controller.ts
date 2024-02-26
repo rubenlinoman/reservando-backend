@@ -50,6 +50,26 @@ export class HabitacionController {
   }
 
   /**
+   * Controlador para obtener las habitaciones disponibles
+   * @param fechaInicio - fecha de inicio
+   * @param fechaFin - fecha de fin
+   * @param idAlojamiento - identificador del alojamiento
+   * @returns devuelve un array de habitaciones
+   */
+  @Get('disponibles/tipos/:fechaInicio/:fechaFin/:idAlojamiento')
+  getAvailableRooms(
+    @Param('fechaInicio') fechaInicio: string,
+    @Param('fechaFin') fechaFin: string,
+    @Param('idAlojamiento') idAlojamiento: number,
+  ): Promise<Habitacion[]> {
+    return this.habitacionService.getAvailableRooms(
+      fechaInicio,
+      fechaFin,
+      idAlojamiento,
+    );
+  }
+
+  /**
    * Controlador para obtener todas las habitaciones de un alojamiento
    * @param idAlojamiento - id del alojamiento (number)
    * @returns devuelve un arreglo de habitaciones
@@ -99,7 +119,7 @@ export class HabitacionController {
   @UseInterceptors(
     FileInterceptor('imagen', {
       storage: diskStorage({
-        destination: './public/images/', 
+        destination: './public/images/',
         filename: (req, file, cb) => {
           const codigo =
             Math.random().toString(32).substring(2) + Date.now().toString(32);
@@ -121,10 +141,7 @@ export class HabitacionController {
     @UploadedFile() image: Express.Multer.File,
     @Body() updateRoomDto: UpdateRoomDTO,
   ): Promise<Number> {
-    return this.habitacionService.updateRoom(
-      updateRoomDto,
-      image,
-    );
+    return this.habitacionService.updateRoom(updateRoomDto, image);
   }
 
   /**

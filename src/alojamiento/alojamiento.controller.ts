@@ -1,4 +1,4 @@
-import { Alojamiento, TipoAlojamiento } from 'src/shared/entities';
+import { Alojamiento, Habitacion, TipoAlojamiento, TipoHabitacion } from 'src/shared/entities';
 import { AlojamientoService } from './alojamiento.service';
 import {
   Body,
@@ -47,12 +47,26 @@ export class AlojamientoController {
   }
 
   /**
+   * Controlador para obtener los tipos de habitaciones de un alojamiento
+   * @param idAlojamiento - identificador del alojamiento
+   * @returns devuelve un array de tipos de alojamientos
+   */
+  @Get('tipos-habitacion/:idAlojamiento')
+  findRoomTypesByAccommodationId(
+    @Param('idAlojamiento') idAlojamiento: number,
+  ): Promise<TipoHabitacion[]> {
+    return this.alojamientoService.findRoomTypesByAccommodationId(idAlojamiento);
+  }
+
+  /**
    * Controlador para obtener un alojamiento
    * @param idAlojamiento - identificador del alojamiento
    * @returns devuelve el alojamiento
    */
   @Get(':idAlojamiento')
-  findAccommodationById(@Param('idAlojamiento') idAlojamiento: number): Promise<Alojamiento> {
+  findAccommodationById(
+    @Param('idAlojamiento') idAlojamiento: number,
+  ): Promise<Alojamiento> {
     return this.alojamientoService.findAccommodationById(idAlojamiento);
   }
 
@@ -114,7 +128,7 @@ export class AlojamientoController {
   @UseInterceptors(
     FileInterceptor('imagen', {
       storage: diskStorage({
-        destination: './public/images/', 
+        destination: './public/images/',
         filename: (req, file, cb) => {
           const codigo =
             Math.random().toString(32).substring(2) + Date.now().toString(32);

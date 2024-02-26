@@ -1,4 +1,8 @@
-import { Alojamiento, TipoAlojamiento } from 'src/shared/entities';
+import {
+  Alojamiento,
+  TipoAlojamiento,
+  TipoHabitacion,
+} from 'src/shared/entities';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -28,9 +32,9 @@ export class AlojamientoService {
    */
   findAllHomePage(): Promise<Alojamiento[]> {
     const query = `SELECT a.id_alojamiento AS idAlojamiento, a.nombre_alojamiento AS nombreAlojamiento, 
-    a.descripcion, a.capacidad, a.ciudad, a.imagen, a.id_tipo_alojamiento AS idTipoAlojamiento, a.id_propietario AS idPropietario, 
+    a.descripcion, a.capacidad, a.direccion, a.ciudad, a.imagen, a.id_tipo_alojamiento AS idTipoAlojamiento, a.id_propietario AS idPropietario, 
     h.precio, h.en_oferta AS enOferta FROM alojamiento a LEFT JOIN ( SELECT id_alojamiento, MIN(precio) AS precio, 
-    en_oferta FROM habitacion GROUP BY id_alojamiento ) h ON a.id_alojamiento = h.id_alojamiento; `;
+    en_oferta FROM habitacion GROUP BY id_alojamiento ) h ON a.id_alojamiento = h.id_alojamiento;`;
 
     return this.alojamientoRepository.query(query);
   }
@@ -41,6 +45,21 @@ export class AlojamientoService {
    */
   findAllTypes(): Promise<TipoAlojamiento[]> {
     return this.tipoAlojamientoRepository.find();
+  }
+
+  /**
+   * Método para obtener los tipos de hsbitaciones de un alojamiento
+   * @param idAlojamiento - identificador del alojamiento
+   * @returns devuelve un array de tipos de alojamientos
+   */
+  findRoomTypesByAccommodationId(
+    idAlojamiento: number,
+  ): Promise<TipoHabitacion[]> {
+    const query = `SELECT DISTINCT(tipo_habitacion.nombre_tipo_habitacion) AS nombreTipoHabitacion FROM habitacion LEFT JOIN tipo_habitacion
+    ON habitacion.id_tipo_habitacion = tipo_habitacion.id_tipo_habitacion
+    WHERE id_alojamiento = ${idAlojamiento} ORDER BY tipo_habitacion.id_tipo_habitacion`;
+
+    return this.alojamientoRepository.query(query);
   }
 
   /**
@@ -114,7 +133,6 @@ export class AlojamientoService {
 
       // Verificar si se proporciona una nueva imagen
       if (image) {
-
         // Si hay una nueva imagen, inclúyela en la actualización
         newUpdate = {
           ...newUpdate,

@@ -44,8 +44,6 @@ export class MailService {
    */
   async sendForgotPasswordMail(forgotPassword: ForgotPasswordMail) {
     const url = `${forgotPassword.baseUrl}/auth/password-change`;
-
-    console.log('url:', url);
     
     // Generar token único
     const token = jwt.sign({ email: forgotPassword.email }, 'secreto', {

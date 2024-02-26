@@ -137,8 +137,6 @@ export class AuthService {
 
     // 1 - comprobar que el mail existe en la base de datos sino devolver error
     const user = await this.usuarioRepository.findOneBy({ email: email });
-    console.log('user', user);
-    
 
     if ( !user ) {
       throw new UnauthorizedException('El mail de usuario no existe');

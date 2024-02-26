@@ -27,7 +27,4 @@ export class UpdateAccommodationDTO {
 
   @IsString()
   idTipoAlojamiento: number;
-
-  @IsString()
-  idPropietario: number;
 }

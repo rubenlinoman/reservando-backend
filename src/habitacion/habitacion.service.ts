@@ -39,6 +39,43 @@ export class HabitacionService {
   }
 
   /**
+   * Método para obtener las habitaciones disponibles
+   * @param fechaInicio - fecha de inicio
+   * @param fechaFin - fecha de fin
+   * @param idAlojamiento - identificador del alojamiento
+   * @returns devuelve un array de habitaciones
+   */
+  getAvailableRooms(
+    fechaInicio: string,
+    fechaFin: string,
+    idAlojamiento: number,
+  ) {
+
+    const query = `SELECT th.nombre_tipo_habitacion AS nombreTipoHabitacion, 
+                      COUNT(*) AS cantidadDisponible, h.precio, h.capacidad
+                      FROM 
+                          habitacion h
+                      JOIN 
+                          tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
+                      LEFT JOIN 
+                          reserva r ON h.id_habitacion = r.id_habitacion
+                                  AND (
+                                      '${fechaInicio}' BETWEEN r.fecha_inicio AND r.fecha_fin
+                                      OR '${fechaFin}' BETWEEN r.fecha_inicio AND r.fecha_fin
+                                  )
+                      WHERE 
+                          h.id_alojamiento = ${idAlojamiento}
+                          AND r.id_reserva IS NULL
+                      GROUP BY 
+                          nombreTipoHabitacion, 
+                          th.nombre_tipo_habitacion, 
+                          h.precio, 
+                          h.capacidad;`;
+
+    return this.habitacionRepository.query(query);
+  }
+
+  /**
    * Método para obtener todas las habitaciones de un alojamiento
    * @param idAlojamiento - id del alojamiento (number)
    * @returns devuelve un arreglo de habitaciones
@@ -53,24 +90,21 @@ export class HabitacionService {
    * @param image - imagen
    * @returns  devuelve la habitacion creada
    */
-  async create(createHabitacionDto: CreateHabitacionDTO, image: Express.Multer.File) {
+  async create(
+    createHabitacionDto: CreateHabitacionDTO,
+    image: Express.Multer.File,
+  ) {
     try {
-
-      console.log('createHabitacionDto: ', createHabitacionDto);      
-      
       // 1- Crea el alojamiento
-      const newRoom= this.habitacionRepository.create({
+      const newRoom = this.habitacionRepository.create({
         ...createHabitacionDto,
-        imagen: image.filename
+        imagen: image.filename,
       });
 
       // 2- Guardar el alojamiento
       await this.habitacionRepository.insert(newRoom);
 
-      console.log('newRoom después de create: ', newRoom);
-      
       return newRoom;
-
     } catch (error) {
       throw new BadRequestException(`Error al crear la habitacion: ${error}`);
     }
@@ -82,10 +116,7 @@ export class HabitacionService {
    * @param image - imagen
    * @returns devuelve el numero de filas afectadas
    */
-  async updateRoom(
-    updateRoomnDto: UpdateRoomDTO,
-    image: Express.Multer.File,
-  ) {
+  async updateRoom(updateRoomnDto: UpdateRoomDTO, image: Express.Multer.File) {
     const { idHabitacion, ...update } = updateRoomnDto;
 
     try {
@@ -93,14 +124,12 @@ export class HabitacionService {
 
       // Verificar si se proporciona una nueva imagen
       if (image) {
-        console.log('image: ', image);
 
         // Si hay una nueva imagen, inclúyela en la actualización
         newUpdate = {
           ...newUpdate,
           imagen: image.filename,
         };
-        
       }
 
       // Actualizar el alojamiento en la base de datos
