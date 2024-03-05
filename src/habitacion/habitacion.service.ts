@@ -50,28 +50,47 @@ export class HabitacionService {
     fechaFin: string,
     idAlojamiento: number,
   ) {
-
     const query = `SELECT th.nombre_tipo_habitacion AS nombreTipoHabitacion, 
-                      COUNT(*) AS cantidadDisponible, h.precio, h.capacidad
-                      FROM 
-                          habitacion h
-                      JOIN 
-                          tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
-                      LEFT JOIN 
-                          reserva r ON h.id_habitacion = r.id_habitacion
-                                  AND (
-                                      '${fechaInicio}' BETWEEN r.fecha_inicio AND r.fecha_fin
-                                      OR '${fechaFin}' BETWEEN r.fecha_inicio AND r.fecha_fin
-                                  )
-                      WHERE 
-                          h.id_alojamiento = ${idAlojamiento}
-                          AND r.id_reserva IS NULL
-                      GROUP BY 
-                          nombreTipoHabitacion, 
-                          th.nombre_tipo_habitacion, 
-                          h.precio, 
-                          h.capacidad;`;
+      th.id_tipo_habitacion AS idTipoHabitacion,
+      COUNT(*) AS cantidadDisponible, h.precio, h.capacidad
+      FROM 
+          habitacion h
+      JOIN 
+          tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
+      LEFT JOIN 
+          reserva r ON h.id_habitacion = r.id_habitacion
+                  AND (
+                      '${fechaInicio}' BETWEEN r.fecha_inicio AND r.fecha_fin
+                      OR '${fechaFin}' BETWEEN r.fecha_inicio AND r.fecha_fin
+                  )
+      WHERE 
+          h.id_alojamiento = ${idAlojamiento}
+          AND r.id_reserva IS NULL
+          OR r.id_estado_reserva = 3
+      GROUP BY 
+          nombreTipoHabitacion, 
+          th.nombre_tipo_habitacion, 
+          h.precio, 
+          h.capacidad;`;
 
+    return this.habitacionRepository.query(query);
+  }
+
+  /**
+   * Método para obtener las habitaciones disponibles por tipo y alojamiento
+   * @param fechaInicio - fecha de inicio
+   * @param fechaFin - fecha de fin
+   * @param idAlojamiento - identificador del alojamiento
+   * @param idTipoHabitacion - identificador del tipo de habitacion
+   * @returns devuelve un array de habitaciones
+   */
+  getAvailableRoomsByAccommodationAndRoomType(
+    fechaInicio: string,
+    fechaFin: string,
+    idAlojamiento: number,
+    idTipoHabitacion: number,
+  ) {
+    const query = `SELECT h.id_habitacion AS idHabitacion, h.nombre_habitacion AS nombreHabitacion, h.precio, h.capacidad FROM habitacion h JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion LEFT JOIN reserva r ON h.id_habitacion = r.id_habitacion AND ('${fechaInicio}' BETWEEN r.fecha_inicio AND r.fecha_fin OR '${fechaFin}' BETWEEN r.fecha_inicio AND r.fecha_fin) WHERE h.id_alojamiento = ${idAlojamiento} AND h.id_tipo_habitacion = ${idTipoHabitacion} AND r.id_reserva IS NULL`;
     return this.habitacionRepository.query(query);
   }
 
@@ -124,7 +143,6 @@ export class HabitacionService {
 
       // Verificar si se proporciona una nueva imagen
       if (image) {
-
         // Si hay una nueva imagen, inclúyela en la actualización
         newUpdate = {
           ...newUpdate,

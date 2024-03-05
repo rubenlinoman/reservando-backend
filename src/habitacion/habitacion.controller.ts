@@ -70,6 +70,31 @@ export class HabitacionController {
   }
 
   /**
+   * Controlador para obtener las habitaciones disponibles por tipo y alojamiento
+   * @param fechaInicio - fecha de inicio
+   * @param fechaFin - fecha de fin
+   * @param idAlojamiento - identificador del alojamiento
+   * @param idTipoHabitacion - identificador del tipo de habitacion
+   * @returns devuelve un array de habitaciones
+   */
+  @Get(
+    'disponibles/tipos/:fechaInicio/:fechaFin/:idAlojamiento/:idTipoHabitacion',
+  )
+  getAvailableRoomsByAccommodationAndRoomType(
+    @Param('fechaInicio') fechaInicio: string,
+    @Param('fechaFin') fechaFin: string,
+    @Param('idAlojamiento') idAlojamiento: number,
+    @Param('idTipoHabitacion') idTipoHabitacion: number,
+  ): Promise<Habitacion[]> {
+    return this.habitacionService.getAvailableRoomsByAccommodationAndRoomType(
+      fechaInicio,
+      fechaFin,
+      idAlojamiento,
+      idTipoHabitacion,
+    );
+  }
+
+  /**
    * Controlador para obtener todas las habitaciones de un alojamiento
    * @param idAlojamiento - id del alojamiento (number)
    * @returns devuelve un arreglo de habitaciones

@@ -12,6 +12,7 @@ import { AlojamientoModule } from './alojamiento/alojamiento.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { HabitacionModule } from './habitacion/habitacion.module';
+import { ReservaModule } from './reserva/reserva.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { HabitacionModule } from './habitacion/habitacion.module';
     HabitacionModule,
     MailModule,
     UsuarioModule,
+    ReservaModule,
   ],
   controllers: [],
   providers: [AppService],
