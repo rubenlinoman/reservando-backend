@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EstadoReserva, Reserva } from 'src/shared/entities';
 import { Repository } from 'typeorm';
 import { CreateReservaDto } from './dto/create-reserva.dto';
+import { UpdateReservationDTO } from './dto';
 
 @Injectable()
 export class ReservaService {
@@ -23,7 +24,10 @@ export class ReservaService {
    * @param idTipoUsuario - id del tipo de usuario
    * @returns devuelve todas las reservas de un propietario
    */
-  findAllByOwner(idPropietario: number, idTipoUsuario: number): Promise<Reserva[]> {
+  findAllByOwner(
+    idPropietario: number,
+    idTipoUsuario: number,
+  ): Promise<Reserva[]> {
     let query = `SELECT 
                     reserva.id_reserva AS idReserva, 
                     reserva.id_usuario AS idUsuario,
@@ -92,6 +96,51 @@ export class ReservaService {
   }
 
   /**
+   * Método para obtener una reserva a partir de su id
+   * @param idReserva - id de la reserva
+   * @returns devuelve la reserva
+   */
+  findReservationById(idReserva: number): Promise<Reserva> {
+    return this.reservaRepository.findOneBy({ idReserva: idReserva });
+  }
+
+  /**
+   * Método que obtiene todas las reservas de un usuario (cliente)
+   * @param idUsuario - id del usuario
+   * @returns devuelve todas las reservas de un usuario
+   */
+  findAllByUserId(idUsuario: number): Promise<Reserva[]> {
+    let query = `SELECT 
+                      reserva.id_reserva AS idReserva, 
+                      reserva.id_usuario AS idUsuario,
+                      usuario.nombre AS nombreUsuario, 
+                      usuario.apellidos AS apellidosUsuario,
+                      usuario.id_tipo_usuario AS idTipoUsuario,
+                      reserva.id_alojamiento AS idAlojamiento,
+                      alojamiento.nombre_alojamiento AS nombreAlojamiento,
+                      alojamiento.id_propietario AS idPropietario,
+                      reserva.id_habitacion AS idHabitacion,
+                      reserva.id_estado_reserva AS idEstadoReserva,
+                      habitacion.nombre_habitacion AS nombreHabitacion,
+                      estado_reserva.nombre_estado_reserva AS nombreEstadoReserva,
+                      reserva.fecha_inicio AS fechaInicio,
+                      reserva.fecha_fin AS fechaFin
+                  FROM 
+                      reserva 
+                  LEFT JOIN 
+                      usuario ON reserva.id_usuario = usuario.id_usuario
+                  LEFT JOIN 
+                      alojamiento ON reserva.id_alojamiento = alojamiento.id_alojamiento
+                  LEFT JOIN
+                    habitacion ON reserva.id_habitacion = habitacion.id_habitacion
+                  LEFT JOIN
+                    estado_reserva ON reserva.id_estado_reserva = estado_reserva.id_estado_reserva
+                  WHERE reserva.id_usuario = ${idUsuario}`;
+
+    return this.reservaRepository.query(query);
+  }
+
+  /**
    * Método para crear una reserva
    * @param createReservaDto - datos de la reserva
    * @returns devuelve la reserva
@@ -102,13 +151,39 @@ export class ReservaService {
       const newReservation = this.reservaRepository.create({
         ...createReservaDto,
       });
-      
+
       // 2- Guardar el alojamiento
       await this.reservaRepository.insert(newReservation);
 
       return newReservation;
     } catch (error) {
       throw new BadRequestException(`Error al crear la habitacion: ${error}`);
+    }
+  }
+
+  /**
+   * Método para editar una reserva
+   * @param updateReservaDto - datos de la reserva
+   * @returns devuelve affected
+   */
+  async editReservation(
+    updateReservaDto: UpdateReservationDTO,
+  ) {
+    const { idReserva, ...update } = updateReservaDto;
+    try {
+      let newUpdate: any = { ...update };
+
+      // Actualizar el alojamiento en la base de datos
+      const exito = await this.reservaRepository.update(
+        idReserva,
+        newUpdate,
+      );
+      
+      return exito.affected;
+    } catch (error) {
+      throw new BadRequestException(
+        `Error al actualizar la reserva: ${error}`,
+      );
     }
   }
 }
