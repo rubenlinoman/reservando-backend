@@ -17,8 +17,8 @@ export class Usuario {
   @PrimaryGeneratedColumn({ type: "int", name: "id_usuario" })
   idUsuario: number;
 
-  @Column("varchar", { name: "usuario", length: 255 })
-  usuario: string;
+  // @Column("varchar", { name: "usuario", length: 255 })
+  // usuario: string;
 
   @Column("varchar", { name: "nombre", nullable: true, length: 255 })
   nombre: string | null;

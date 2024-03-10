@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   Injectable,
@@ -21,14 +20,13 @@ import * as jwt from 'jsonwebtoken';
 import { MailService } from '../mail/services/mail.service';
 import { PasswordChangeDto } from './dto/passwordChange.dt';
 
-
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
     private readonly jwtService: JwtService,
-    private mailService: MailService
+    private mailService: MailService,
   ) {}
 
   /**
@@ -43,21 +41,33 @@ export class AuthService {
   }
 
   /**
+   * Método para obtener el usuario a través de su id
+   * @param idUsuario - id del usuario
+   * @returns devuelve el usuario
+   */
+  async findUserById(idUsuario: number): Promise<Usuario> {
+    const user = await this.usuarioRepository.findOneBy({
+      idUsuario: idUsuario,
+    });
+    const { password, ...rest } = user;
+    return rest;
+  }
+
+  /**
    * Método para iniciar sesión
    * @param loginDto - email y password
    * @returns devuelve el token
    */
   async login(loginDto: LoginDto): Promise<LoginResponse> {
-    
     const { email: email, password: password } = loginDto;
 
     const user = await this.usuarioRepository.findOneBy({ email: email });
 
     if (!user) {
       throw new UnauthorizedException('Credentials invalid - email');
-    }  
+    }
 
-    if ( !bcryptjs.compareSync( password, user.password )) {
+    if (!bcryptjs.compareSync(password, user.password)) {
       throw new UnauthorizedException('Credentials invalid - password');
     }
 
@@ -65,7 +75,6 @@ export class AuthService {
 
     const token = this.getJwtToken({
       email: user.email,
-      usuario: user.usuario,
     });
 
     return {
@@ -79,11 +88,12 @@ export class AuthService {
    * @param registerDto - email, nombre, apellidos, password
    * @returns devuelve el token
    */
-  async register(registerDto: RegisterDto): Promise<LoginResponse> {    
-
+  async register(registerDto: RegisterDto): Promise<LoginResponse> {
     const user = await this.crear(registerDto);
-    
-    const token = this.getJwtToken({ email: user.email, usuario: user.usuario, });
+
+    const token = this.getJwtToken({
+      email: user.email,
+    });
 
     return {
       user: user,
@@ -97,48 +107,53 @@ export class AuthService {
    * @returns devuelve el usuario
    */
   async crear(registerDto: RegisterDto) {
-    
     try {
-      const { password, ...userData } = registerDto;
-      
-      const passEncriptada = bcryptjs.hashSync(password, 10);
+      const existingUserByEmail = await this.usuarioRepository.findOneBy({
+        email: registerDto.email,
+      });
 
+  
+      if (existingUserByEmail) {
+        throw new BadRequestException(
+          'El correo electrónico o nombre de usuario ya está en uso.',
+        );
+      }
+  
+      const { password, ...userData } = registerDto;
+  
+      const passEncriptada = bcryptjs.hashSync(password, 10);
+  
       // 1- Crea el usuario
       const newUser = this.usuarioRepository.create({
         password: passEncriptada,
         ...userData,
       });
-      
+  
       // 2- Guardar el usuario
       await this.usuarioRepository.insert(newUser);
-
+  
       // 3- Elimina el Pass para devolverlo en el array
-      const { password:_, ...user } = newUser;
-      
+      const { password: _, ...user } = newUser;
+  
       return user;
-
     } catch (error) {
-
-      if (error.errno === 1062) {
-        throw new BadRequestException(`${registerDto.email} ya existe!`);
-      }
-      throw new BadRequestException('Algo terrible ocurrió :( !');
+      throw error; // Propaga el error original para mantener la estructura
     }
   }
+  
 
   /**
    * Método para enviar el mail de cambio de password
    * @param forgotPasswordDto - email y base url
    * @returns devuelve el mail
    */
-  async forgotPassword( forgotPasswordDto: ForgotPasswordDto) {
-
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
     const { email, baseUrl } = forgotPasswordDto;
 
     // 1 - comprobar que el mail existe en la base de datos sino devolver error
     const user = await this.usuarioRepository.findOneBy({ email: email });
 
-    if ( !user ) {
+    if (!user) {
       throw new UnauthorizedException('El mail de usuario no existe');
     }
 
@@ -150,8 +165,8 @@ export class AuthService {
       email: email,
       nombre: name,
       apellidos: lastName,
-      baseUrl: baseUrl
-    }
+      baseUrl: baseUrl,
+    };
 
     return this.mailService.sendForgotPasswordMail(forgotPasswordMail);
   }
@@ -162,17 +177,17 @@ export class AuthService {
    */
   async passUpdate(passwordChangeDto: PasswordChangeDto) {
     const { token, email, newPassword } = passwordChangeDto;
-  
+
     try {
       // Verificar si el token es válido y no ha expirado
       jwt.verify(token, 'secreto');
-  
+
       // Obtener el usuario correspondiente al email
       const user = await this.usuarioRepository.findOneBy({ email: email });
-      
+
       // Encriptar la nueva contraseña
       const passEncriptada = bcryptjs.hashSync(newPassword, 10);
-  
+
       if (user) {
         user.password = passEncriptada;
         await this.usuarioRepository.save(user);

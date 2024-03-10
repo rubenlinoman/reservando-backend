@@ -76,4 +76,46 @@ export class MailService {
       );
     }
   }
+
+  /**
+   * Método para enviar correo de confirmación de reserva
+   * @param mail - email del usuario
+   * @param nombre - nombre del usuario
+   * @param apellidos - apellidos del usuario
+   * @param nombreAlojamiento - nombre del alojamiento
+   * @param ciudad - ciudad del alojamiento
+   * @param fechaInicio - fecha de entrada en el alojamiento
+   * @param direccion - direccion del alojamiento
+   * @returns devuelve la respuesta
+   */
+  async sendBookingConfirmationMail(mailUsuario: string, nombreUsuario: string, apellidosUsuario: string, nombreAlojamiento: string, ciudad: string, fechaInicio: string, direccion: string) {
+    const url = `${this.urlWeb}/reserva`;
+    // Usar el nombre del archivo de la plantilla
+    const template = 'confirmacion-reserva';
+
+    let subject = 'Confirmación de reserva en ReservAndo';
+
+    try {
+      // Código que envía el correo electrónico
+      const respuesta = await this.mailerService.sendMail({
+        to: mailUsuario,
+        from: '"Support Team" <support@reservando.com>',
+        subject: subject,
+        template: template, // Usar el nombre del archivo de la plantilla
+        context: {
+          nombreUsuario: nombreUsuario + ' ' + apellidosUsuario,
+          nombreAlojamiento: nombreAlojamiento,
+          localidad: ciudad,
+          fechaEntrada: fechaInicio,
+          direccion: direccion,
+        },
+      });
+      return respuesta;
+    } catch (error) {
+      console.error('Error al enviar el correo electrónico:', error);
+      throw new InternalServerErrorException(
+        'Error al enviar el correo electrónico',
+      );
+    }
+  }
 }

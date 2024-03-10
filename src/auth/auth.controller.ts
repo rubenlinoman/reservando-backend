@@ -46,7 +46,7 @@ export class AuthController {
   
       return {
         user: user,
-        token: this.authService.getJwtToken({ email: user.email, usuario: user.usuario }),
+        token: this.authService.getJwtToken({ email: user.email }),
       }
     }
 

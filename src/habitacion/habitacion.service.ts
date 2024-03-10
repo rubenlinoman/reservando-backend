@@ -90,7 +90,12 @@ export class HabitacionService {
     idAlojamiento: number,
     idTipoHabitacion: number,
   ) {
-    const query = `SELECT h.id_habitacion AS idHabitacion, h.nombre_habitacion AS nombreHabitacion, h.precio, h.capacidad FROM habitacion h JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion LEFT JOIN reserva r ON h.id_habitacion = r.id_habitacion AND ('${fechaInicio}' BETWEEN r.fecha_inicio AND r.fecha_fin OR '${fechaFin}' BETWEEN r.fecha_inicio AND r.fecha_fin) WHERE h.id_alojamiento = ${idAlojamiento} AND h.id_tipo_habitacion = ${idTipoHabitacion} AND r.id_reserva IS NULL`;
+    const query = `SELECT h.id_habitacion AS idHabitacion, h.nombre_habitacion AS nombreHabitacion,
+    h.precio, h.capacidad FROM habitacion h JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion LEFT JOIN reserva r 
+    ON h.id_habitacion = r.id_habitacion AND ('${fechaInicio}' 
+    BETWEEN r.fecha_inicio AND r.fecha_fin OR '${fechaFin}' 
+    BETWEEN r.fecha_inicio AND r.fecha_fin) WHERE h.id_alojamiento = ${idAlojamiento} 
+    AND h.id_tipo_habitacion = ${idTipoHabitacion} AND r.id_reserva IS NULL`;
     return this.habitacionRepository.query(query);
   }
 

@@ -1,9 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EstadoReserva, Reserva } from 'src/shared/entities';
 import { Repository } from 'typeorm';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservationDTO } from './dto';
+import { MailService } from 'src/mail/services/mail.service';
+import { AuthService } from 'src/auth/auth.service';
+import { AlojamientoService } from 'src/alojamiento/alojamiento.service';
+import { HabitacionService } from 'src/habitacion/habitacion.service';
 
 @Injectable()
 export class ReservaService {
@@ -12,6 +20,10 @@ export class ReservaService {
     private reservaRepository: Repository<Reserva>,
     @InjectRepository(EstadoReserva)
     private estadoReservaRepository: Repository<EstadoReserva>,
+    private mailService: MailService,
+    private authService: AuthService,
+    private alojamientoService: AlojamientoService,
+    private habitacionService: HabitacionService,
   ) {}
 
   findAll(): Promise<Reserva[]> {
@@ -147,6 +159,24 @@ export class ReservaService {
    */
   async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
     try {
+      const user = this.authService.findUserById(createReservaDto.idUsuario);
+      const reservation = this.findReservationById(createReservaDto.idUsuario);
+      const accommodation = this.alojamientoService.findAccommodationById(
+        createReservaDto.idAlojamiento,
+      );
+
+      // Verificar si ya existe una reserva para la habitación en las fechas especificadas
+      const reservaExistente = await this.existeReservaEnFecha(
+        createReservaDto.idHabitacion,
+        createReservaDto.fechaInicio,
+        createReservaDto.fechaFin,
+      );
+
+      if (reservaExistente) {
+        throw new Error(
+          'Ya existe una reserva para esta habitación en las fechas especificadas.',
+        );
+      }
       // 1- Crea el alojamiento
       const newReservation = this.reservaRepository.create({
         ...createReservaDto,
@@ -154,6 +184,17 @@ export class ReservaService {
 
       // 2- Guardar el alojamiento
       await this.reservaRepository.insert(newReservation);
+
+      // Enviar el correo electrónico de confirmación de reserva
+      await this.mailService.sendBookingConfirmationMail(
+        (await user).email,
+        (await user).nombre,
+        (await user).apellidos,
+        (await accommodation).nombreAlojamiento,
+        (await accommodation).ciudad,
+        newReservation.fechaInicio, // Utilizamos la fecha de inicio de la nueva reserva
+        (await accommodation).direccion,
+      );
 
       return newReservation;
     } catch (error) {
@@ -166,24 +207,32 @@ export class ReservaService {
    * @param updateReservaDto - datos de la reserva
    * @returns devuelve affected
    */
-  async editReservation(
-    updateReservaDto: UpdateReservationDTO,
-  ) {
+  async editReservation(updateReservaDto: UpdateReservationDTO) {
     const { idReserva, ...update } = updateReservaDto;
     try {
       let newUpdate: any = { ...update };
 
       // Actualizar el alojamiento en la base de datos
-      const exito = await this.reservaRepository.update(
-        idReserva,
-        newUpdate,
-      );
-      
+      const exito = await this.reservaRepository.update(idReserva, newUpdate);
+
       return exito.affected;
     } catch (error) {
-      throw new BadRequestException(
-        `Error al actualizar la reserva: ${error}`,
-      );
+      throw new BadRequestException(`Error al actualizar la reserva: ${error}`);
     }
+  }
+
+  async existeReservaEnFecha(
+    idHabitacion: number,
+    fechaInicio: string,
+    fechaFin: string,
+  ): Promise<boolean> {
+    const reserva = await this.reservaRepository.findOne({
+      where: {
+        idHabitacion: idHabitacion,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+      },
+    });
+    return !!reserva; // Devuelve true si la reserva existe, false en caso contrario
   }
 }

@@ -3,8 +3,6 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsInt, IsIn } from 'class-validator';
 
 export class RegisterDto {
-  @IsNotEmpty()
-  usuario: string;
 
   @IsNotEmpty()
   nombre: string;
