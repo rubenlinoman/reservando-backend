@@ -73,4 +73,36 @@ export class UsuarioService {
       throw new UnauthorizedException('Token no válido o ha expirado');
     }
   }
+
+  /**
+   * Método para cambiar la contraseña
+   * @param actualizarDto - DTO para actualizar
+   * @returns devuelve la cantidad de filas afectadas
+   */
+  async actualizarPass( actualizarDto: any ) {
+
+    const { idUsuario, email, password } = actualizarDto;
+
+    const passEncriptada = bcryptjs.hashSync( password, 10);
+
+    try {
+      
+      const exito = await this.usuarioRepository.update(idUsuario, { password: passEncriptada })
+
+      return exito.affected;
+
+    } catch(error) {
+      throw new BadRequestException(`Algo terrible ha sucedido :( !`)
+    }
+    
+  }
+
+  /**
+   * Método para eliminar un usuario
+   * @param idUsuario - id del usuario
+   * @returns devuelve el usuario eliminado
+   */
+  removeUser(idUsuario: number) {
+    return this.usuarioRepository.delete(idUsuario);
+  }
 }

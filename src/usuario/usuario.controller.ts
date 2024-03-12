@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -72,5 +73,17 @@ export class UsuarioController {
   @Patch('reset-password')
   passwordChange(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.usuarioService.resetPassword(resetPasswordDto);
+  }
+
+  @Patch('editarPass')
+  actualizarAdminPass( 
+    @Body() actualizarDto: any
+  ) {
+    return this.usuarioService.actualizarPass(actualizarDto);
+  }
+
+  @Delete(':idUsuario')
+  removeUser(@Param('idUsuario') idUsuario: number) {
+    return this.usuarioService.removeUser(idUsuario);
   }
 }
