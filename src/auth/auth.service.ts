@@ -177,11 +177,11 @@ export class AuthService {
    */
   async passUpdate(passwordChangeDto: PasswordChangeDto) {
     const { token, email, newPassword } = passwordChangeDto;
-
+    
     try {
       // Verificar si el token es válido y no ha expirado
       jwt.verify(token, 'secreto');
-
+      
       // Obtener el usuario correspondiente al email
       const user = await this.usuarioRepository.findOneBy({ email: email });
 

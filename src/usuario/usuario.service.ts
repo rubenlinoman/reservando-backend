@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { diskStorage } from 'multer';
 import { Usuario } from 'src/shared/entities';
-import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { Repository } from 'typeorm';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+
+import * as bcryptjs from 'bcryptjs';
 
 @Injectable()
 export class UsuarioService {
@@ -19,6 +19,12 @@ export class UsuarioService {
    */
   findAll() {
     return this.usuarioRepository.find();
+  }
+
+  findUserById(idUsuario: number): Promise<Usuario> {
+    console.log('idUsuario', idUsuario);
+    
+    return this.usuarioRepository.findOneBy({ idUsuario: idUsuario });
   }
 
   /**
@@ -39,6 +45,32 @@ export class UsuarioService {
     } catch(error) {
       throw new BadRequestException(`Error al actualizar el usuario :( !`)
     }
+  }
+
+  /**
+   * Método para cambiar la contraseña
+   * @param resetPasswordDto - email y password
+   */
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { email, newPassword } = resetPasswordDto;
+    console.log('passwordChangeDto', resetPasswordDto);
     
+    try {
+      // Obtener el usuario correspondiente al email
+      const user = await this.usuarioRepository.findOneBy({ email: email });
+
+      // Encriptar la nueva contraseña
+      const passEncriptada = bcryptjs.hashSync(newPassword, 10);
+
+      if (user) {
+        user.password = passEncriptada;
+        await this.usuarioRepository.save(user);
+      } else {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+    } catch (error) {
+      // Manejar el caso en el que el token no es válido o ha expirado
+      throw new UnauthorizedException('Token no válido o ha expirado');
+    }
   }
 }
