@@ -21,9 +21,7 @@ export class UsuarioService {
     return this.usuarioRepository.find();
   }
 
-  findUserById(idUsuario: number): Promise<Usuario> {
-    console.log('idUsuario', idUsuario);
-    
+  findUserById(idUsuario: number): Promise<Usuario> {    
     return this.usuarioRepository.findOneBy({ idUsuario: idUsuario });
   }
 
@@ -53,7 +51,6 @@ export class UsuarioService {
    */
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     const { email, newPassword } = resetPasswordDto;
-    console.log('passwordChangeDto', resetPasswordDto);
     
     try {
       // Obtener el usuario correspondiente al email
